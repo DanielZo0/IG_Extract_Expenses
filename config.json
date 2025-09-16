@@ -1,0 +1,12 @@
+{
+    "date_overrides": {
+        "FD11914471": "19/08/2025"
+    },
+    "suppliers": {
+        "Attard&Co": "Attard & Co Food Ltd",
+        "CamelBrand": "Camel Brand Marketing Ltd"
+    },
+    "customer": "IG International Ltd",
+    "nominal_ac": "5000",
+    "default_type": "PI"
+}
