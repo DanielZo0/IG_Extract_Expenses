@@ -485,17 +485,21 @@ def process_pdfs():
             # Create output filenames based on invoice number or original filename
             invoice_number_clean = (data['Invoice Number'] or os.path.splitext(os.path.basename(pdf_file))[0]).replace("/", "_").replace("\\", "_")
             
-            # Create company-specific output directory
+            # Create company-specific output directories
             company_output_dir = os.path.join(output_dir, company_dir) if company_dir else output_dir
+            company_metadata_dir = os.path.join(output_dir, "metadata", company_dir) if company_dir else os.path.join(output_dir, "metadata")
+            
             if not os.path.exists(company_output_dir):
                 os.makedirs(company_output_dir)
+            if not os.path.exists(company_metadata_dir):
+                os.makedirs(company_metadata_dir)
             
             # Handle potential duplicate invoice numbers by checking if file already exists
             base_name = invoice_number_clean
             invoice_filename = f"invoice_{base_name}.json"
             metadata_filename = f"metadata_{base_name}.json"
             invoice_path = os.path.join(company_output_dir, invoice_filename)
-            metadata_path = os.path.join(company_output_dir, metadata_filename)
+            metadata_path = os.path.join(company_metadata_dir, metadata_filename)
             
             counter = 1
             while os.path.exists(invoice_path) or os.path.exists(metadata_path):
@@ -504,22 +508,22 @@ def process_pdfs():
                 invoice_filename = f"invoice_{unique_name}.json"
                 metadata_filename = f"metadata_{unique_name}.json"
                 invoice_path = os.path.join(company_output_dir, invoice_filename)
-                metadata_path = os.path.join(company_output_dir, metadata_filename)
+                metadata_path = os.path.join(company_metadata_dir, metadata_filename)
                 counter += 1
                 
                 # Log the duplicate detection
                 if counter == 2:  # Only log on first duplicate
                     logging.warning(f"Duplicate invoice number detected: {base_name}. Using unique suffix for {pdf_file}")
             
-            # Save invoice JSON file (without metadata)
+            # Save invoice JSON file (without metadata) - wrapped in array brackets
             with open(invoice_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=4, ensure_ascii=False)
+                json.dump([data], f, indent=4, ensure_ascii=False)
             
-            # Save metadata JSON file separately
+            # Save metadata JSON file separately - wrapped in array brackets
             with open(metadata_path, 'w', encoding='utf-8') as f:
-                json.dump(metadata, f, indent=4, ensure_ascii=False)
+                json.dump([metadata], f, indent=4, ensure_ascii=False)
             
-            logging.info(f"Successfully processed {pdf_file} -> {invoice_filename} + {metadata_filename}")
+            logging.info(f"Successfully processed {pdf_file} -> {invoice_filename} + metadata/{company_dir}/{metadata_filename}")
             success_count += 1
             
         except ValidationError as ve:
